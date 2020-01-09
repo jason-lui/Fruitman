@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Scoreboard Test Firebase</title>
+</head>
+
+<body>
+
+    <!-- Display the current score -->
+    <h1>Score: <span id="score1">0</span></h1>
+
+    <br>
+
+    <input id="name" type="text" placeholder="Enter your name...">
+    <button onclick="saveScore()">Save Score</button>
+
+    <h2>Scoreboard</h2>
+    <table id="scoreboard">
+        <tr>
+            <th>Name</th>
+            <th>Score</th>
+        </tr>
+    </table>
+
+    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/7.5.0/firebase-app.js"></script>
+    <!-- Import Firestore -->
+    <script src="https://www.gstatic.com/firebasejs/7.5.0/firebase-firestore.js"></script>
+    <!-- Import our JavaScript file -->
+    <script>
+        // Your web app's Firebase configuration
+        var firebaseConfig = {
+            apiKey: "AIzaSyAEyuuun-TuL5tITDXRgh7kAtkHc5Qc0zw",
+            authDomain: "aaaa-b10b7.firebaseapp.com",
+            databaseURL: "https://aaaa-b10b7.firebaseio.com",
+            projectId: "aaaa-b10b7",
+            storageBucket: "aaaa-b10b7.appspot.com",
+            messagingSenderId: "356668720452",
+            appId: "1:356668720452:web:0c3abab9ff9bbf59cb8311"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Setup access to the database
+        let db = firebase.firestore();
+        let score = 0
+        let newScore = localStorage.getItem('score')
+
+        function bringScore() {
+            document.getElementById('score1').innerHTML = newScore
+        }
+
+
+
+
+        function saveScore() {
+            // Get name from input box
+            let name = document.getElementById('name').value;
+
+            // Make sure name has a value, if not send alert.
+            if (name !== "") {
+                // Add a new document in collection "scores"
+                db.collection("scores").doc().set({
+                    name: name,
+                    score: newScore
+                })
+                    .then(function () {
+                        console.log("Document successfully written!");
+                        updateScores();
+                    })
+                    .catch(function (error) {
+                        console.error("Error writing document: ", error);
+                    });
+            } else {
+                alert('Please enter a name');
+            }
+        }
+
+        function updateScores() {
+            // Clear current scores in our scoreboard
+            document.getElementById('scoreboard').innerHTML = '<tr><th>Name</th><th>Score</th></tr>';
+
+            // Get the top 5 scores from our scoreboard
+            db.collection("scores").orderBy("score", "desc").limit(5).get().then((snapshot) => {
+                snapshot.forEach((doc) => {
+                    document.getElementById('scoreboard').innerHTML += '<tr>' +
+                        '<td>' + doc.data().name + '</td>' +
+                        '<td>' + doc.data().score + '</td>' +
+                        '</tr>';
+                })
+            })
+            bringScore();
+        }
+
+        window.onload = updateScores();
+    </script>
+</body>
+
+</html>

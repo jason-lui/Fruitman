@@ -1,0 +1,395 @@
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel='stylesheet' type='text/css' href='css/hangmanCSS.css' />
+    <title>Hangman</title>
+</head>
+
+<body>
+    <div id="gameTitleWrapper">
+        <div id="gameTitle"><center><span>FRUITMAN</span></center></div>
+    </div>
+    <div id="lifeValWrapper"></div>
+    <div id="scoreValWrapper"></div>
+    <br><br><br><br><br><br><br>
+    <div id="game"></div>
+    <div id="btn"></div>
+    <br><br><br>
+    <div id="restartWrapper2"></div>
+    <br><br>
+    <div id='hiddenscoreboard'>
+        <h2>Scoreboard</h2>
+        <table id='scoreboard'>
+            <tr>
+                <th>Name</th>
+                <th>Score</th>
+            </tr>
+        </table>
+        <br>
+        <div id="nameSection">
+            <input id="name" type="text" placeholder="Name">
+            <br>
+            <button onclick="saveScore()">Save Score</button>
+        </div>
+    </div>
+
+
+
+
+    <script src="js/hangmanLib.js"></script>
+    <!-- Firebase App (the core Firebase SDK) is always required and must be listed first -->
+    <script src="https://www.gstatic.com/firebasejs/7.5.0/firebase-app.js"></script>
+    <!-- Import Firestore -->
+    <script src="https://www.gstatic.com/firebasejs/7.5.0/firebase-firestore.js"></script>
+    <!-- Import our JavaScript file -->
+    <script>
+        // Your web app's Firebase configuration
+        var firebaseConfig = {
+            apiKey: "AIzaSyAEyuuun-TuL5tITDXRgh7kAtkHc5Qc0zw",
+            authDomain: "aaaa-b10b7.firebaseapp.com",
+            databaseURL: "https://aaaa-b10b7.firebaseio.com",
+            projectId: "aaaa-b10b7",
+            storageBucket: "aaaa-b10b7.appspot.com",
+            messagingSenderId: "356668720452",
+            appId: "1:356668720452:web:0c3abab9ff9bbf59cb8311"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+
+        // Setup access to the database
+        let db = firebase.firestore();
+
+        const buttonWidth = "40px";
+        const buttonHeight = "40px";
+        var alphabet = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+        var wordBank = ['apple', 'orange', 'banana', 'kiwi', 'watermelon', 'durian', 'strawberry', 'blueberry', 'lemon', 'committee', 'tattoo', 'electricity']
+        var wordHints = { // word: hint
+            'apple': 'a fruit that is used in pies',
+            'orange': 'a citrus fruit',
+            'banana': 'a long fruit',
+            'kiwi': 'a hairy fruit',
+            'watermelon': 'a big fruit',
+            'durian': 'a smelly fruit',
+            'strawberry': 'a red fruit',
+            'blueberry': 'a blue fruit',
+            'lemon': 'a sour fruit',
+            'committee': 'not a fruit',
+            'tattoo': 'can be fruit, body modifcation with ink',
+            'electricity': 'pretend fruit, with a shocking surprise'
+        }
+
+        var word = selectWord().toUpperCase();
+        var lives = 7;
+        var score = 0;
+        var gameOverSound = new Audio('src/gameover.mp3');
+
+
+
+
+        // Button object constructor
+        function makeButton(letter) {
+            this.button = document.createElement('button');
+            this.button.innerHTML = letter;
+            this.button.className = 'button';
+            this.button.onclick = function() {
+                if (lives > 0) {
+                    if (word.includes(letter)) {
+                        let letters = document.getElementsByClassName(letter);
+                        for (i = 0; i < letters.length; i++) {
+                            letters[i].innerHTML = letter;
+                            score++;
+                            done += 1
+                        }
+                        displayScore(score);
+                        if (done == word.length) {
+                            setTimeout(function() {
+                                win(lives)
+                            }, 100);
+                        }
+                    } else {
+                        lives--;
+                        decrementScore();
+                        displayLives(lives);
+                        displayHangman(lives);
+                        displayScore(score);
+                        lost(lives);
+                        lifeLostSound();
+                    }
+                    document.getElementById(letter).style.display = 'none';
+                }
+            }
+            document.getElementById(letter).appendChild(this.button);
+        }
+
+        // Decrement score only above 0
+        function decrementScore() {
+            if (score > 0) {
+                score--;
+            }
+        }
+
+        // alerts user if all the lives are used
+        function lost(lives) {
+            if (lives === 0) {
+                window.alert("Try again! The answer was " + word)
+                gameOverSound.play();
+            }
+        }
+
+        // soundeffect when life lost
+        function lifeLostSound() {
+            let noSound = new Audio('src/nope.mp3')
+            noSound.play()
+
+        }
+
+        // alerts user if they won
+        function win(lives) {
+            if (lives === 7) {
+                window.alert("Perfect score! You're a grand master!")
+            } else if (0 < lives < 7) {
+                window.alert("You win")
+
+            }
+            showScoreboard()
+        }
+
+        // Generate the set of buttons
+        function generateButtons() {
+            let buttonDOM = document.getElementById('buttonWrapper')
+            if (buttonDOM) {
+                for (let i = 0; i < alphabet.length; i++) {
+                    document.getElementById(alphabet[i]).style.display = 'unset';
+                }
+            } else {
+                let buttonWrapper = document.createElement('div');
+                buttonWrapper.id = 'buttonWrapper';
+                document.getElementById('btn').appendChild(buttonWrapper);
+
+                for (let i = 0; i < alphabet.length; i++) {
+                    let childButton = document.createElement('div');
+                    childButton.id = alphabet[i];
+                    childButton.className = 'childButton';
+                    document.getElementById('buttonWrapper').appendChild(childButton);
+
+                    let newButton = new makeButton(alphabet[i]);
+                }
+            }
+        }
+
+
+
+        // Generate the restart button
+        function generateRestartButton() {
+            let restartDisplay = document.getElementById('restart');
+            if (!restartDisplay) { // Restart button does not exist
+                let restartWrapper = document.createElement('div');
+                restartWrapper.id = 'restartWrapper';
+                document.getElementById('restartWrapper2').appendChild(restartWrapper);
+
+                let button = document.createElement('button');
+                button.innerHTML = 'Restart';
+                button.id = 'restart';
+                button.onclick = function() {
+                    restart();
+                    gameOverSound.pause()
+                    document.getElementById("hiddenscoreboard").style.display = "none";
+                    document.getElementById("nameSection").style.display = "none";
+                }
+                document.getElementById('restartWrapper').appendChild(button);
+            }
+        }
+
+        // Clears the game 
+        function restart() {
+            // Set the initial game state
+            word = selectWord().toUpperCase();
+            score = 0;
+            lives = 7;
+
+            // Run the game
+            runGame();
+        }
+
+        // Manage the hangman
+        function displayHangman(lives) {
+            let hangmanDisplay = document.getElementById('image');
+            if (hangmanDisplay) { // Update hangman if it exists
+                document.getElementById('image').src = `images/hangman_${lives}.png`
+            } else { // Create a hangman display if it doesn't exist (beginning of game)
+                createHangman();
+            }
+        }
+
+        // displayHangman helper function
+        function createHangman() {
+            let imageWrapper = document.createElement('div');
+            imageWrapper.id = 'imageWrapper';
+            document.getElementById('game').appendChild(imageWrapper);
+
+            let image = document.createElement('img');
+            image.id = 'image';
+            image.src = "images/hangman_7.png";
+            image.draggable = false;
+            document.getElementById('imageWrapper').appendChild(image);
+        }
+
+        // Randomly select a word from the word bank
+        function selectWord() {
+            let i = Math.floor(Math.random() * wordBank.length);
+            let word = wordBank[i];
+            return word
+        }
+
+        // Generate the blank spaces for the word
+        function generateBlankSpaces(word) {
+            let spaceDOM = document.getElementById('spaceWrapper');
+            if (spaceDOM) {
+                document.getElementById('spaceWrapper').remove();
+            }
+            createBlankSpaces(word);
+        }
+
+        // Creates blank spaces under word.
+        function createBlankSpaces(word) {
+            let spaceWrapper = document.createElement('div');
+            spaceWrapper.id = 'spaceWrapper';
+            document.getElementById('game').appendChild(spaceWrapper);
+
+            let letterWrapper = document.createElement('div');
+            letterWrapper.id = 'letterWrapper';
+            letterWrapper.className = 'letterWrapper'
+            document.getElementById('spaceWrapper').appendChild(letterWrapper);
+
+            for (let i = 0; i < word.length; i++) {
+                let letter = document.createElement('p');
+                letter.innerHTML = "_"
+                letter.className = `letter ${word[i]}`;
+                document.getElementById(`letterWrapper`).appendChild(letter);
+            }
+        }
+
+        // Manage lives
+        function displayLives(lives) {
+            let lifeDisplay = document.getElementById('lives');
+            if (lifeDisplay) { // Update lives if it exists
+                document.getElementById('lives').innerHTML = `Lives: ${lives}`;
+            } else { // Create a life display if it doesn't exist (beginning of game)
+                createLifeDisplay();
+            }
+        }
+
+        // displayLives helper function
+        function createLifeDisplay() {
+            let lifeVal = document.createElement('p');
+            lifeVal.id = 'lives';
+            lifeVal.innerHTML = `Lives: ${lives}`;
+            document.getElementById('lifeValWrapper').appendChild(lifeVal);
+        }
+
+        // Manage score
+        function displayScore(score) {
+            let scoreDisplay = document.getElementById('score');
+            if (scoreDisplay) { // Update score if it exists
+                document.getElementById('score').innerHTML = `Score: ${score}`;
+            } else { // Create a score display if it doesn't exist (beginning of game)
+                createScoreDisplay();
+            }
+        }
+
+        // displayScore helper function
+        function createScoreDisplay() {
+            let scoreVal = document.createElement('p');
+            scoreVal.id = 'score';
+            scoreVal.innerHTML = `Score: ${score}`;
+            document.getElementById('scoreValWrapper').appendChild(scoreVal);
+        }
+
+        // displays the Hint.
+        function displayHint(word) {
+            let hintWrapper = document.createElement('div');
+            hintWrapper.id = 'hintWrapper';
+            document.body.appendChild(hintWrapper);
+
+            let hint = document.createElement('p');
+            hint.id = 'hint';
+            hint.innerHTML = `Hint: ${wordHints[word.toLowerCase()]}`;
+            document.getElementById('hintWrapper').appendChild(hint);
+            document.getElementById('spaceWrapper').appendChild(hintWrapper);
+        }
+
+        function saveScore() {
+            // Get name from input box
+            let name = document.getElementById('name').value;
+            // Make sure name has a value, if not send alert.
+            if (name !== "") {
+                // Add a new document in collection "scores"
+                db.collection("scores").doc().set({
+                        name: name,
+                        score: score
+
+                    })
+                    .then(function() {
+                        console.log("Document successfully written!");
+                        updateScores();
+                    })
+                    .catch(function(error) {
+                        console.error("Error writing document: ", error);
+                    });
+                document.getElementById("nameSection").style.display = "none";
+            } else {
+                alert('Please enter a name');
+            }
+        }
+
+
+        function updateScores() {
+            // Clear current scores in our scoreboard
+            document.getElementById('scoreboard').innerHTML = '<tr><th>Name</th><th>Score</th></tr>';
+
+            // Get the top 10 scores from our scoreboard
+            db.collection("scores").orderBy("score", "desc").limit(10).get().then((snapshot) => {
+                snapshot.forEach((doc) => {
+                    document.getElementById('scoreboard').innerHTML += '<tr>' +
+                        '<td>' + doc.data().name + '</td>' +
+                        '<td>' + doc.data().score + '</td>' +
+                        '</tr>';
+                })
+            })
+        }
+
+
+        // shows hidden scoreboards
+        function showScoreboard() {
+            document.getElementById("hiddenscoreboard").style.display = 'unset';
+            document.getElementById("nameSection").style.display = 'unset';
+        }
+
+        // Invocation
+        function runGame() {
+
+            done = 0
+            displayLives(lives);
+            displayScore(score);
+
+            displayHangman(lives);
+            generateBlankSpaces(word);
+
+            displayHint(word);
+
+            generateButtons();
+            generateRestartButton();
+            lost(lives);
+            updateScores();
+        }
+
+        runGame();
+    </script>
+</body>
+
+</html>

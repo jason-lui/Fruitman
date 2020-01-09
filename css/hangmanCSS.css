@@ -1,0 +1,203 @@
+body {
+    background-image: url("1.jpg")
+}
+
+#score {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 45px;
+    text-align: center;
+}
+
+#restart {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 20px;
+    padding-left: 20px;
+    padding-right: 20px;
+    border-radius: 10px;
+    cursor: pointer;
+    user-select: none;
+}
+
+#restartWrapper {
+    text-align: center;
+    position: relative;
+    top: 70%;
+}
+
+#hiddenscoreboard {
+    display: none;
+    text-align: center;
+    position: relative;
+    margin-left: 20%;
+    margin-right: 30%
+}
+
+.button {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 20px;
+    position: relative;
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    cursor: pointer;
+    user-select: none;
+}
+
+@media only screen and (max-width: 625px) {
+    .button {
+        width: 65px;
+        height: 65px;
+    }
+}
+
+#buttonWrapper {
+    display: block;
+    justify-content: center;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+    position: relative;
+    top: 60%;
+}
+
+table {
+    position: rela;
+    border: 5px solid black;
+    border-collapse: collapse;
+    height: 5px;
+    font-size: 30px;
+    text-align: center;
+    margin-left: 50%;
+    margin-right: 50%;
+    transform: translate(-50%, 0);
+    background-color: white;
+}
+
+#image {
+    position: relative;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, 0);
+    max-width: 100%;
+    height: auto;
+    user-select: none;
+}
+
+#imageWrapper {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    position: relative;
+    top: 10%;
+}
+
+#spaceWrapper {
+    display: inline;
+    word-wrap: break-word;
+    justify-content: center;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+.letter {
+    display: inline;
+    font-size: 50px;
+    user-select: none;
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+.letterWrapper {
+    display: block;
+    text-align: center;
+}
+
+.childButton {
+    display: inline-block;
+}
+
+#gameTitle {
+    position: relative;
+    top: 5%;
+    font-family: Impact, Haettenschweiler, 'Arial Narrow Bold', sans-serif;
+    font-size: 50px;
+}
+
+span {
+    border-radius: 20px;  
+    background-color: #DDA0DD;
+    padding: 6px;
+}
+
+#lifeValWrapper {
+    position: absolute;
+    top: 13%;
+    left: 20%;
+}
+
+#lives {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 30px;
+    user-select: none;
+}
+
+#scoreValWrapper {
+    position: absolute;
+    top: 13%;
+    right: 20%;
+}
+
+#score {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 30px;
+    user-select: none;
+}
+
+#hintWrapper {
+    display: block;
+    justify-content: center;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+#hint {
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 30px;
+    user-select: none;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+@media only screen and (max-width: 625px) {
+    #hint,
+    #lives,
+    #score {
+        font-size: 20px;
+    }
+    .letter {
+        font-size: 15px;
+    }
+}
+
+#nameSection {
+    width: 30%;
+    position: relative;
+    left: 35%;
+    font-size: 20px;
+    size: 1;
+}
+
+input[type=text],
+select {
+    width: 30%;
+    font-size: 20px
+}
+
+#btn {
+    width: 80%;
+    position: relative; 
+    left: 50%;
+    transform: translateX(-50%);    
+}
